@@ -30,7 +30,7 @@
 % Single address.
 % ---------------
 \name{Qinyi Luo$^+$, Rahul Gupta$^o$, Shrikanth Narayanan$^o$}
-\address{ $^+$Tsingua University, Beijing, China \\
+\address{ $^+$Department of Electronic Engineering, Tsingua University, Beijing, China \\
 $^o$Signal Analysis and Interpretation Lab, University of Southern California,  Los Angeles, CA, USA}  
 \begin{document}
 \ninept
@@ -124,7 +124,7 @@ In the baseline systems, we only use the datapoints corresponding to each indivi
 We describe the choice of baseline modeling schemes for the deception and sincerity prediction below.
 \\
 
-\noindent{\bf Deception prediction}  
+\noindent{\it Deception prediction}  
 We train a Support Vector Machine (SVM) classifier on the Compare Acoustic Feature Set \cite{} to predict the binary label of an utterance being deceptive or not.
 Same classifier was also used in the baseline presented in the Interspeech challenge 2016 \cite{}.
 For evaluation purpose, we perform a 10 fold cross-validation, each fold containing an independent set of speakers.  
@@ -135,7 +135,7 @@ The baseline results are listed in Table~\ref{}.
 Note that the results are slightly different than the one presented in the Interspeech 2016 challenge paper \cite{} as their evaluation defined a different partitioning scheme for the development and the testing set.
 \\
 
-\noindent{\bf Sincerity predicition}
+\noindent{\it Sincerity predicition}
 Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) with spearman correlation as the evaluation metric. 
 Same regressor and evaluation metric were used during the Interspeech challenge 2016.
 In this case, we perform a leave one out speaker crossvalidation due to smaller number of datasamples.
@@ -152,7 +152,7 @@ In the first approach, We expect that adding datapoints from the other dataset w
 The second approach aims to exploit the hypotheses that there exists a relation between the sincerity and deception lables, therefore one can be used a predictor for the other.
 We describe these experiments in detail below. 
 
-\subsubsection{KT: appending datapoints}
+\subsubsection{KT: appending datapoints from the other dataset}
 %Based on the baselines, the knowledge transfer experiments aimed to improve the performance on one dataset with the help of the other dataset. To allow fair comparison, some procedures remained unchanged: (a) when training D classifiers, ten-fold cross validation was implemented in the same way as in the baselines, and the box constraint was tuned on the development set; (b) when obtaining S regressors, leave-one-speaker-out cross validation was adopted as in the baselines, and the best cost parameter was chosen on the development set.
 
 In this section, we append the datapoints from the other dataset in order to improve the performance for the task of interest.
@@ -161,7 +161,7 @@ These datapoints and synthetic labels are appended with the datapoints and the l
 We test two synthetic label generation algorithms: Rxxx (Ransac) and label transformation.
 We discuss these algorithms in detail below.
 
-(a){Rxxx (RANSAC)}
+(a){Random Sample Consensus (RANSAC)}
 %One way to transfer knowledge is to add one dataset as unlabeled data to the other dataset in hope that more data points will generate better results. In light of this, we implemented the RANSAC algorithm.\par
 %RANSAC is an iterative algorithm. Starting from a small set of data points (the initial dataset), it enlarges the dataset by adding consistent data points and renews the model in each iteration. In an extreme case of RANSAC, the unlabeled data can be added into the initial dataset all in one iteration. More information about RANSAC can be found in [x].\par
 %In our experiments, one of the D and S datasets served as the initial dataset, and the other dataset was treated as unlabeled data to be added. Z-scores were taken on both datasets to reconcile possible differences in data characteristics that resulted from recording conditions.\par
@@ -175,7 +175,7 @@ Researchers have proposed several criterion for selecting the fraction of data (
 The procedure is repeated iteratively till a certain criterion is met (in our experiments, we perform the iterations till the performance on the held out development set is maximized).
 Since the task objective is different for the DSD and the SSC corpus, we describe them seprately below. 
 
-\noindent{\bf Deception prediction}  
+\noindent{\it Deception prediction:}  
 For the purpose of deception prediction, synthetic labels are obtained on the entire SSC dataset.
 We use the same train, test and development set split as in the baseline experiments.
 Initially, an SVM model is obtained using the train partition of the DSD dataset and datapoints are added from the SSC dataset till the performance on the development partition of the DSD dataset is maximized.
@@ -197,12 +197,12 @@ The RANSAC algorithm does not make of sincerity labels during training decption 
 Alternatively during the label transformation, we transform the continous sincerity labels into binary deception labels and vice versa for deception and sincerity prediction, respectively.
 We describe the label transformation for deception and sincerity prediction below.
 
-\noindent{\bf Deception prediction}  
+\noindent{\it Deception prediction}  
 In this experiment, we append a part of the sincerity dataset to the DSD dataset durint model training.
 The portion of the sincerity dataset with percieved sincerity below (/above) a certain threshold are marked as deceptive (/non-deceptive). 
 These two threshold are tuned as a pair for maximal performance on the development partition of the DSD dataset. 
 
-\noindent{\bf Sincerity prediction}
+\noindent{\it Sincerity prediction}
 Obtaining sincerity labels on the deception dataset involves transforming binary labels into a continous sincerity scale.
 For our experiments, we approximate all deceptive utterances to carry a fixed sincerity rating. 
 Similarly, all non-decptive utterances are labeled with a different constant sincerity ratings.
@@ -221,30 +221,45 @@ We provide the experimental details for the experiments below.
 %\subsubsection{Sincerity/deception prediction features obtained from original models}
 %In this experiment, during deception (/sincerity) prediction we make use of sincerity (/deception) predictions obtained from models trained on the SSC (/DSD) dataset. We breifly explain the experiments for the deception and sincerity prediction below. 
 
-\noindent{\bf Deception prediction} 
+\noindent{\it Deception prediction} 
 We use the train, test and development set partitions for the DSD dataset as described before.
 The sincerity scores for the DSD dataset are obtained from a model trained on a domain adapted version of the SSC dataset.
 We use the Geodesic Kernel Flow (GFK) adaptation \cite{} to this effect.
 {\bf Check} We treat the SSC dataset as the source dataset and adapt it to have a similar distibution like the DSD dataset. 
 We then train a model on the adapted SSC dataset and make predictions on the DSD dataset.
 The sincerity scores are used in conjunction with the original acoustic features (in section~\ref{sec:}) to predict deception in a stacked generalized framework \cite{}.
-In the stacked generalized framework a model is first trained to obtain predictions from the original features. 
-These predictions are combined with the predicted sincerity scores on the DSD dataset by another SVM model to provide the final decision. 
+In the stacked generalized framework a deception prediction SVM model is first trained from the original acoustic features on the training set (this model is same as baseline deception predictio model).
+Then, applytig this model on the development set, we obtain the distances from SVM decision hyperplanes as soft deception scores. 
+We then train a final SVM model that combines these soft deception scores and the sincerity scores obtained on the development partition of the DSD dataset to provide the final label. 
+%These predictions are then combined with the predicted sincerity scores on the DSD dataset by another SVM model to provide the final decision.
+The second layer SVM model is trained on the development partition of DSD dataset to prevent overfitting to the training set. 
 
-\noindent{\bf Sincerity prediction}
+\noindent{\it Sincerity prediction}
 Akin to the deception prediction experiments, we use the predefined train, test and development set partitions for the SSC dataset.
 We predict the deception outcomes for the SSC dataset using a model trained on an adapted version of the DSD dataset.
-The adaptation is again performed using GFK adaptation, with DSD dataset modified as source dataset to resemble SSC dataset as the target dataset.
+The adaptation is again performed using the GFK transformation, with DSD dataset modified as source dataset to resemble SSC dataset as the target dataset.
 An SVM classifier trained on the adapted version of the DSD dataset predicts deception outcomes on the SSC dataset. 
 However, instead of using the binary deception lables, we use distance of datapoints from SVM decision hyperplanes as a soft deception score. 
-We combine these deception scores with the original acoustic features again using a stacked generalization framework, where an initial prediction is first made just based on original features. 
-Another SVR model then combines these initial predictions with the deception scores (distance from SVM hyperplanes) to provide the final sincerity scores.  
-
+We combine these deception scores with the original acoustic features again using a stacked generalization framework. 
+An first layer SVR model predicts the sincerity scores based on the original features and is trained on the training partition of the SSC dataset (this model is same as the baseline sincerity prediction model). 
+A second layer SVR model then combines the first layer predictions with the deception scores (distance from SVM hyperplanes) to provide the final sincerity scores.  
+The second layer SVR model is trained on the development set to prevent overfitting to the training set. 
 In the next section, we combined the appending datapoints and appending sincerity/deception outcomes as features. 
 
-\subsection{Knowledge transfer: appending datapoints + using sincerity/deception predictions as features}
-In this section, we combine the pre
+\subsection{KT: appending datapoints + using sincerity/deception predictions as features}
+In this section, we combine the previous two KT approaches of appending datapoints and sincerity/deception predictions as features.
+We describe the approaches for deception and sincerity prediction below.
+\\
 
+\noindent{\it Deception prediction} This experiment is similar to the deception prediction in the last section involving the incorporation of sincerity/deception scores as features during prediction.
+The only difference is in the first stage of stacked generalization where we append the sincerity dataset instead to the training partition of the DSD dataset to train a deception prediction SVM model, SVM$_\text{D1}$. 
+SVM could then be trained using either RANSAC or label transformation.
+The second stage SVM is then trained using the hyperplane distances from the first  
+
+\noindent{\it Sincerity prediction}
+
+
+In the next section, we present our results for the baseline and various KT models and present discussion.
 
 %\subsubsection{Proposed method}
 %The proposed method also exploited both data information and label information. However, unlike the aforementioned two methods, it implemented fusion of labels instead of combining the two datasets, and utilized a kernel-based domain adaptation method to reduce influence of differences in the recording conditions. In general, each data point was assigned 2 labels, one predicted by a D classifier and the other by a S regressor. The two labels were then combined to give a final decision.\par
@@ -257,68 +272,87 @@ In this section, we combine the pre
 
 
 
-
 \section{Results}
-Generally speaking, the performance improved after the fusion of labels, no matter which classifier/regressor was used to derive $Lbl_{orig}$. It did matter, however, whether the GFK domain adaptation was used to obtain $Lbl_{other}$, as shown in the table that without the domain adaptation, $Lbl_{other}$ would very much resemble random guessing. When using $Lbl_{orig}$ only, i.e. using the methods in 4.2.1 and 4.2.2 and their combination with the baseline method, the performance didn't show improvement in most cases as compared to the baselines.\par
-In deception recognition, \par
-\centerline{Table1. UAR in deception recognition}
-\begin{threeparttable}
-\begin{tabular}{|l|l|l|l|}
-\hline
-& Using $Lbl_{orig}$ & Using $Lbl_{other}$ & Using fusion of\\
-& only & only & the 2 labels\\
-\hline
-Baselines & 0.6964 & \multirow{4}{*}{ } & 0.7202 \\
-\cline{1-2}
-\cline{4-4}
-RANSAC & (a) 0.6964\tnote{1} & 0.6081 & (a) 0.7202 \\
-& (b) 0.6964 & & (b) 0.7193 \\
-& (c) 0.7026 & & (c) 0.7096 \\
-\cline{1-2}
-\cline{4-4}
-Transform & 0.6717 & *w/o GFK: & 0.6990 \\
-labels & & 0.5275 & \\
-\cline{1-2}
-\cline{4-4}
-Combined\tnote{2} & (a)  & & (a) 0.7005 \\
-& (b)  & & (b) 0.7005\\
-& (c) 0.6933 & & (c) 0.7059\\
-\hline
-\end{tabular}
-\begin{tablenotes}
-\item[1] Listed in the table are results of the three strategies we applied. The strategies are: (a) add 5 percent of unlabeled data in each iteration; (b) add 5 percent of unlabeled data in each iteration; (c) add all of the unlabeled data in one iteration. Please refer to section 4.2.1 for more details.
-\item[2] In the combined method, as stated in 4.2.3, the three methods above were integrated by selecting the classifier that performed the best on the development set in each fold. The said classifier was then used in the fusion. The identifier (a), (b), (c) indicates which RANSAC strategy was used.
-\end{tablenotes}
-\end{threeparttable}
+Table~\ref{} and ~\ref{} show the UARs for the various deception and sincerity prediction results. 
+Apart from presenting the result for each approach (baseline, RANSAC, label transformation and appending sincerity/deception scores as features), we also perform an experiment where the training approach is selected based on the perf  
 
-\medskip
+%%Generally speaking, the performance improved after the fusion of labels, no matter which classifier/regressor was used to derive $Lbl_{orig}$. It did matter, however, whether the GFK domain adaptation was used to obtain $Lbl_{other}$, as shown in the table that without the domain adaptation, $Lbl_{other}$ would very much resemble random guessing. When using $Lbl_{orig}$ only, i.e. using the methods in 4.2.1 and 4.2.2 and their combination with the baseline method, the performance didn't show improvement in most cases as compared to the baselines.\par
+%%In deception recognition, \par
 
-\centerline{Table2. Spearman's correlation in sincerity evaluation}
-\begin{threeparttable}
-\begin{tabular}{|l|l|l|l|}
-\hline
-& Using $Lbl_{orig}$ & Using $Lbl_{other}$ & Using fusion of\\
-& only & only & the 2 labels\\
-\hline
-Baselines & 0.4651 (0.4158\tnote{1}) & \multirow{4}{*}{ } & 0.4853 (0.4784) \\
-\cline{1-2}
-\cline{4-4}
-RANSAC & 0.4645\tnote{2} (0.3366) & 0.1867 (0.1755) & 0.4850 (0.4804) \\
-\cline{1-2}
-\cline{4-4}
-Transform & 0.4344 (0.2936) & *w/o GFK: & 0.4937 (0.4818) \\
-labels & & 0.0084 (0.0101) & \\
-\cline{1-2}
-\cline{4-4}
-Combined\tnote{3} & 0.4590 (0.3108) & & 0.4896 (0.4738) \\
-\hline
+
+\begin{tabular}{l|l|l}
+            & Deception (UAR) & Sincerity ($\rho$) \\ \hline
+Baseline & 69.64 & 46.51 \\ \hline
+\multicolumn{3}{c} {KT: adding datapoints from other dataset} \\ \hline 
+RANSAC & 70.26 & 46.45 \\
+Label Transformation & 67.17 & 43.44 \\ \hline
+\multicolumn{3}{c} {KT: Sinc./Dep. scores as features} \\ \hline 
+ & 72.02 & 48.53 \\ \hline 
+\multicolumn{3}{c} {KT: adding datapoints + Sinc./Dep. scores as features} \\ \hline 
++ RANSAC & 72.02 & 48.53 \\ 
++ Label transformation & 69.90 & 49.37 \\
++ Tuned & 70.59 & 48.96 \\ 
 \end{tabular}
-\begin{tablenotes}
-\item[1] To conduct significance tests, Pearson's correlation was also computed and is shown in parentheses in the table.
-\item[2] Between the two strategies we applied, only the best result is shown in the table. The strategy that generated the best result was then used in the fusion, while the other was not. Both two results are as follows: (a) add one cluster of the unlabeled data in each iteration: 0.4645; (b) add all of the unlabeled data in one iteration: 0.4351.
-\item[3] In the combined method, as stated in 4.2.3, the three methods above were integrated by selecting the regressor that performed the best on the development set in each fold. The said regressor was then used in the fusion.
-\end{tablenotes}
-\end{threeparttable}
+
+
+%\centerline{Table1. UAR in deception recognition}
+%\begin{threeparttable}
+%\begin{tabular}{|l|l|l|l|}
+%\hline
+%& Using $Lbl_{orig}$ & Using $Lbl_{other}$ & Using fusion of\\
+%& only & only & the 2 labels\\
+%\hline
+%Baselines & 0.6964 & \multirow{4}{*}{ } & 0.7202 \\
+%\cline{1-2}
+%\cline{4-4}
+%RANSAC & (a) 0.6964\tnote{1} & 0.6081 & (a) 0.7202 \\
+%& (b) 0.6964 & & (b) 0.7193 \\
+%& (c) 0.7026 & & (c) 0.7096 \\
+%\cline{1-2}
+%\cline{4-4}
+%Transform & 0.6717 & *w/o GFK: & 0.6990 \\
+%labels & & 0.5275 & \\
+%\cline{1-2}
+%\cline{4-4}
+%Combined\tnote{2} & (a)  & & (a) 0.7005 \\
+%& (b)  & & (b) 0.7005\\
+%& (c) 0.6933 & & (c) 0.7059\\
+%\hline
+%\end{tabular}
+%\begin{tablenotes}
+%\item[1] Listed in the table are results of the three strategies we applied. The strategies are: (a) add 5 percent of unlabeled data in each iteration; (b) add 5 percent of unlabeled data in each iteration; (c) add all of the unlabeled data in one iteration. Please refer to section 4.2.1 for more details.
+%\item[2] In the combined method, as stated in 4.2.3, the three methods above were integrated by selecting the classifier that performed the best on the development set in each fold. The said classifier was then used in the fusion. The identifier (a), (b), (c) indicates which RANSAC strategy was used.
+%\end{tablenotes}
+%\end{threeparttable}
+%
+%\medskip
+%
+%\centerline{Table2. Spearman's correlation in sincerity evaluation}
+%\begin{threeparttable}
+%\begin{tabular}{|l|l|l|l|}
+%\hline
+%& Using $Lbl_{orig}$ & Using $Lbl_{other}$ & Using fusion of\\
+%& only & only & the 2 labels\\
+%\hline
+%Baselines & 0.4651 (0.4158\tnote{1}) & \multirow{4}{*}{ } & 0.4853 (0.4784) \\
+%\cline{1-2}
+%\cline{4-4}
+%RANSAC & 0.4645\tnote{2} (0.3366) & 0.1867 (0.1755) & 0.4850 (0.4804) \\
+%\cline{1-2}
+%\cline{4-4}
+%Transform & 0.4344 (0.2936) & *w/o GFK: & 0.4937 (0.4818) \\
+%labels & & 0.0084 (0.0101) & \\
+%\cline{1-2}
+%\cline{4-4}
+%Combined\tnote{3} & 0.4590 (0.3108) & & 0.4896 (0.4738) \\
+%\hline
+%\end{tabular}
+%\begin{tablenotes}
+%\item[1] To conduct significance tests, Pearson's correlation was also computed and is shown in parentheses in the table.
+%\item[2] Between the two strategies we applied, only the best result is shown in the table. The strategy that generated the best result was then used in the fusion, while the other was not. Both two results are as follows: (a) add one cluster of the unlabeled data in each iteration: 0.4645; (b) add all of the unlabeled data in one iteration: 0.4351.
+%\item[3] In the combined method, as stated in 4.2.3, the three methods above were integrated by selecting the regressor that performed the best on the development set in each fold. The said regressor was then used in the fusion.
+%\end{tablenotes}
+%\end{threeparttable}
 
 \section{Discussion}
 
