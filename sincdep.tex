@@ -40,11 +40,12 @@ $^o$Signal Analysis and Interpretation Lab, University of Southern California,  
 \begin{abstract}
 Transfer learning (TL) involves leveraging information from an external source for enhancing model performances for a problem at hand. 
 Popular TL methods either directly use the data or adapt the models learnt on out-of-domain resources and incorporate them within in-domain models. 
-TL methods have shown promise in several applications such as text classification and cross-domain language classification.
+TL methods have shown promise in several applications such as text classification, cross-domain language classification and emotion recognition.
 In this paper, we extend the TL methods to prediction of deceptive intent and sincerity scores on two separate datasets, leveraging information from each other.
 We investigate several TL methods including appending datapoints from the other dataset as well as appending sincerity/deception predictions as features from models learnt on the other dataset. 
-The latter approach is based on the hypotheses that sincerity perception and deceptive intent labels carry certain correlation between them and one could be leveraged during model training for the other. 
-We compare our methods against baseline models trained only on in-domain data and our best models achieve an Unweighted Average Recall (UAR) of 72.02\% in classifying deceptive intent (baseline: 69.64\%) and achieve Spearman's/Pearson's correlation values of 49.37/48.18\% between true and predicted sincerity scores (baseline: 46.51/41.58\%).
+These approaches are based on the hypotheses that sincerity perception and deceptive intent labels carry certain correlation between them and one could be leveraged during model training for the other. 
+We compare our methods against baseline models trained only on in-domain data and our best models achieve an Unweighted Average Recall (UAR) of 72.02\% in classifying deceptive intent (baseline: 69.64\%). 
+Similarly, applied methods achieve Spearman's/Pearson's correlation values of 49.37/48.18\% between true and predicted sincerity scores (baseline: 46.51/41.58\%) indicating the potential of TL in the domain of human behavior understanding.
  
 \end{abstract}
 %
@@ -54,8 +55,8 @@ Transfer Learning (TL), sincerity prediction, deception prediction
 %
 \section{Introduction}
 \label{sec:intro}
-Transfer Learning (TL) focuses on learning knowledge from one domain and applying it to other related domain \cite{}. 
-TL has shown promise in several research fields including 
+Transfer Learning (TL) focuses on learning knowledge from one domain and applying it to other related domain \cite{pan2010survey}. 
+TL has shown promise in several research fields such as mining text data \cite{aggarwal2012mining}, reinforcement learning \cite{taylor2009transfer} and natural language understanding \cite{blitzer2007biographies}.  
 In particular, domain with limited resources (e.g. absence of a comprehensive datasets) can gain from TL approaches as it is possible to learn models on a related problem and adapt the models to domain of interest. 
 Human behavior modeling \cite{} is one such domain where obtaining reliable annotations on large datasets is both expensive and prohibitive in time.
 In this paper, we approach the problem of modeling deceptive intent (deceptive vs not-deceptive) and rating perceived sincerity and apply TL methods in assisting one problem using resources from the other. 
@@ -66,19 +67,24 @@ Our experiments target the overarching goal of enhanced human behavior modeling 
 Studies have investigated and proposed several TL approaches \cite{pan2010survey} and one of the earliest works in TL was proposed by Pratt \cite{pratt1993discriminability}.
 A few TL algorithms include TL via dimensionality reduction \cite{pan2008transfer}, using deep learning representations \cite{bengio2012deep, mesnil2012unsupervised} and transfer learning in a transductive setting \cite{rohrbach2013transfer}.  
 TL methods have been applied to sentiment classification \cite{blitzer2007biographies}, image classification \cite{wu2004improving} and other natural language understanding problems \cite{arnold2007comparative,blitzer2006domain}. 
-Recently, TL methods have been applied to modeling human behavior such as emotion recognition \cite{zhang2016enhanced}, facial expression recognition \cite{chen2013learning} as well as analysis \cite{sangineto2014we}. 
-Within the prediction of sincerity and deception, Zhang et al. \cite{zhang2016sinc} recently proposed a transfer learning approach with multi-task learning perspective.
+Recently, TL methods have been applied to modeling human behavior such as emotion recognition \cite{zhang2016enhanced}, facial expression recognition \cite{chen2013learning} as well as analysis \cite{sangineto2014we}.
+Within the domain of sincerity and deception prediction, several modeling schemes were presented as part of the INTERSPEECH 2016 Computational Paralinguistics Challenge \cite{schuller2016interspeech} including DNN rank learning \cite{gabor2016sinc}, phone recognition based features \cite{herms2016sinc} and fusion of acoustic feature representations \cite{kaya2016sinc}.  
+As a part of the challenge, Zhang et al. \cite{zhang2016sinc} recently proposed a transfer learning approach with multi-task learning perspective.
 {\bf Add a sentence abouth zhang et al. and say how our algo is different after seeing that paper at IS.} 
 
 
-We perform decection and deception modeling on the Deceptive Speech Database and Sincerity Speech Corpus made availalble during the Interspeech challenge 2016 \cite{schuller2016interspeech}.
+The TL tested in our experiments are based on the hypotheses that the two concepts are related, with deceptive sentences being more likely to being perceived as unsincere and vice versa. 
+Research in psychology has investigated the two concepts of sincerity and deception in various contexts such as integrity \cite{mcfall1987integrity}, leadership \cite{stinchfield1936sincerity} and interpersonal perceptions \cite{toris1984effects}. 
+Often these concepts are seen to contradict each other with low sincerity implying a deceptive intent. 
+We test our models based on this hypothesis on the Deceptive Speech Database and Sincerity Speech Corpus made availalble during the Interspeech challenge 2016 \cite{schuller2016interspeech}.
 Initially, we train baseline models from in-domain resources without using any TL from the other dataset. 
 This is followed by testing various settings of TL categorized as: (i) using datapoints from the other dataset and, (ii) using sincerity/deception predictions from the other model as features.
-Using sincerity (/deception) scores during deception (/sincerity) prediction is based on the hypotheses that the two concepts are related, with deceptive sentences being more likely to being perceived as unsincere and vice versa. 
-Research in psychology has investigated the concepts of sincerity and deception and  
-We then finally combine the two approaches and test using datapoints from the other dataset as well as sincerity/deception predictions from other model as features.
+Finally, we also combine the two approaches and test using datapoints from the other dataset as well as sincerity/deception predictions from other model as features.
 The best models achieve an Unweighted Average Recall (UAR) of 72.02\% (baseline: 69.64) on classifying deceptive vs non-deceptive intent and Spearman's/Pearson's corelation coefficients of 49.37/48.18 (baseline: 46.51/41.58) between true and predicted sincerity scores.
-We finally analyze the results and present our conclusions. 
+Finally, we analyze the results and present our conclusions. 
+
+This paper is organized as follows: Section 2 presents the dataset, followed by the description of baseline and various TL methodologies in Section 3.
+We present the results in Section 4 and the final conclusions and a few future steps are presented in Section 5.
 
 \section{Datasets}
 %Two databases from the INTERSPEECH 2016 Computational Paralinguistics Challenge are employed in the experiments, the Deceptive Speech Database (DSD) and the Sincerity Speech Corpus (SSC). For both databases, samples outside of the test set are accessible, constituting the datasets for our experiments, denoted as the D dataset and the S dataset respectively. For both datasets, the official ComParE Acoustic Feature Set was used, containing 6373 static features computed over low-level descriptor contours. For more information about the Challenge, please refer to [x].\par
@@ -96,39 +102,43 @@ We finally analyze the results and present our conclusions.
 %Speech samples in the D dataset are more similar to natural speech, as the subjects were allowed to arrange speech and show emotions freely. On the contrary, participants for the S dataset were subjected to more restrictions, resulting in more acting. Moreover, labels for the D dataset are objective and binary, while sincerity ratings are subjective and continuous.\par
 %The aforementioned differences pose challenge to transferring knowledge from one dataset to the other. On the other hand, they help simulate a real-world inter-concept knowledge transfer situation, where little consistency is guaranteed between corpora.
 
-We use two datasets for the purpose of our experiments: (i) deception dataset and, (ii) sincerity dataset.
-These datasets were also used as part of the Interspeech 2016 computational paralinguistic challenge.
-We breifly describe these two datasets below.\\ 
+We use two datasets for the purpose of our experiments: (i) Deceptive Speech Dataset and, (ii) Sincerity Speech Corpus.
+Both these datasets were made available as part of the Interspeech 2016 computational paralinguistic challenge \cite{schuller2016interspeech}.
+We would like to state that we make use of datasets partitions labeled as training and development set during the challenge, as the testing set labels were not released.
+Our models are evaluated using a cross-validation framework on the data portion with the availablity of lables. 
+We breifly describe the two datasets below.\\ 
 
 \noindent{\bf Deceptive Speech Dataset (DSD)}:
 The DSD dataset is available from the University of Arizona and we use a set of 1059 speech samples obtained from x participants.
 In each of these samples, the participant either lies about his identity and behavior or tells the truth. 
 Therefore, each of these samples is associated with a binary label of the speech being deceptive or not.
-x utterances (out of 1059) are marked as deceptive in the dataset.
-We refer the reader to \cite{} for further details on this dataset.\\ 
+747 utterances (out of 1059) are marked as non-deceptive in the dataset.
+We refer the reader to \cite{schuller2016interspeech} for further details on this dataset.\\ 
 
 \noindent{\bf Sincerity Speech Corpus (SSC)}:
 We use the SSC dataset provided by the Columbia Univesity, consisting of 655 speech samples from 22 speakers.
 Unlike the labelling schemes for the DSD dataset, the samples in the SSC dataset are rated for percieved sincerity by a group of 13 annotators in a range of 0-4. 
 The scores for each annotator were further normalized to zero mean and unit standard deviation.
 Final sincerity score for each sample is computed as the mean of thus normalized sincerity score from each annotator.
-Further details regarding the dataset are available in \cite{}.
+Further details regarding the dataset are available in \cite{schuller2016interspeech}.
 
 The goal of our experiments is to utilize the expected relationship between deception and perceived sincerity lables.
 We hypothesize the deceptive utterances would have a low percieved sincerity, and also, utterances with low percieved sincerity are more likely to be decptive.
 Therefore, in order to improve the performance for one dataset, we aim to utilize the knowledge from the other dataset by either directly using the datasamples from that dataset or using the model learnt on the other dataset.
-However, we need to account for several dissimilarities between the datasets for a maximal transfer of knowledge from one dataset to the others.
+However, the maximal transfer of knowledge from one dataset to the others is not trivial due to several dissimilarities between the datasets.
 These dissimilarities exist in the form of differences in dataset collection conditions and protocols, annotation procedures and the nature of lables.
-Speech samples in the DSD dataset are more similar to natural speech, as the subjects were allowed to arrange speech and show emotions freely. 
+To begin with, we do not have any indication of (continuous) sincerity lables on DSD dataset and (binary) deception lables on the SSC dataset.
+Also, the speech samples in the DSD dataset are more similar to natural speech, as the subjects were allowed to arrange speech and show emotions freely. 
 On the contrary, participants for the SSC dataset were asked to utter pre-specified sentences. 
-Moreover, labels for the DSD dataset are objective and binary, while sincerity ratings in the SSC dataset are subjective and continuous.
+%Moreover, labels for the DSD dataset are objective and binary, while sincerity ratings in the SSC dataset are subjective and continuous.
 We address these issues using a few label generation and data transformation techniques.
-These label generation and data transformation operate on on features extracted from each of the two dataset, as described next.
+The label generation and data transformation are performed using features extracted from each of the two dataset.
+We describe these features in the next section.
 
 \subsection{Features} 
-We use a set of 6376 acoustic features termed as the ComParE Acoustic Feature Set \cite{}.
-These features are statistics computed on prosodic cues (e.g. pitch, intensity, jitter and, shimmer) and spectral cues (Mel Frequency Cepstral Coefficients xxx..).
-Further details on these features are listed in Table x in \cite{}. 
+We use a set of 6376 acoustic features termed as the ComParE Acoustic Feature Set used in the Interspeech challenge baseline \cite{schuller2015interspeech,schuller2016interspeech}.
+These features are statistics computed on energy related descriptors (e.g. loudness, RMS energy, zero crossing rate), spectral descriptors (e.g. Mel Frequency Cepstral Coefficients, spectral energy) and voicing related descriptors (e.g. F0, voicing probability).
+Further details on these features can be obtained from \cite{weninger2013acoustics}. 
 
 
 \section{Methodology}
@@ -153,30 +163,30 @@ We describe the choice of baseline modeling schemes for the deception and sincer
 \\
 
 \noindent\underline{\it Deception prediction}: 
-We train a Support Vector Machine (SVM) classifier on the Compare Acoustic Feature Set \cite{} to predict the binary label of an utterance being deceptive or not.
-Same classifier was also used in the baseline presented in the Interspeech challenge 2016 \cite{}.
+We train a Support Vector Machine (SVM) classifier on the ComParE Acoustic Feature Set \cite{weninger2013acoustics} to predict the binary label of an utterance being deceptive or not.
+Same classifier was also used in the baseline presented in the Interspeech challenge 2016 \cite{schuller2016interspeech}.
 For evaluation purpose, we perform a 10 fold cross-validation, each fold containing an independent set of speakers.  
 8 partitions are used as training set, 1 as development set and 1 as testing set.
 SVM parameters such as kernel and box-constraint are tuned on the development set.
-We use Unweighted Average Recall (UAR) as the evaluation metric on the DSD dataset, as was also the case during the Interspeech challenge 2016 \cite{}.
+We use Unweighted Average Recall (UAR) as the evaluation metric on the DSD dataset, as was also the case during the Interspeech challenge 2016 \cite{schuller2016interspeech}.
 UAR assigns equal weight to each class during recall computation, a case helpful when the class distibution is biased. 
-The baseline results are listed in Table~\ref{}.
-Note that the results are slightly different than the one presented in the Interspeech 2016 challenge paper \cite{} as their evaluation defined a different partitioning scheme for the development and the testing set.
+The baseline results are listed in Table~\ref{tab:results}.
+Note that the results are slightly different than the one presented in the Interspeech 2016 challenge paper \cite{schuller2016interspeech} as their evaluation defined a different partitioning scheme for the development and the testing set.
 \\
 
 \noindent\underline{\it Sincerity predicition}:
-Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) as the predictor (same regressor model was used during the Interspeech challenge 2016 \cite{}).
+Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) as the predictor (same regressor model was used during the Interspeech challenge 2016 \cite{schuller2016interspeech}).
 We use evaluation metrics as both Spearman's and Pearsons's correlation to obtain a sense of relative ordering as well as linear correspondance between predicted and true labels. 
 In the baseline experiment, we perform a finer leave one out speaker crossvalidation due to a small number of datasamples.
 Apart from the speaker in the testing set, other speakers are roughly equally divided between the training and the development set.
 The parameters for the SVR (kerner and box-constraint) are tuned on the development set. 
-Table~\ref{} presents the baseline results.
-The results are slightly different from the ones presented in the Interspeech 2016 challenge paper \cite{} due to difference in partition and the fact that in the Interspeech challenge, the box-constraint parameter was tuned globally for each fold.
+Table~\ref{tab:results} presents the baseline results.
+The results are slightly different from the ones presented in the Interspeech 2016 challenge paper \cite{schuller2016interspeech} due to difference in partition and the fact that in the Interspeech challenge, the box-constraint parameter was tuned globally for each fold.
 We, on the other hand, find the best parameters for each for indipendently based on the development set. 
 
-\subsection{Knowledge Transfer (KT)}
-Using Knowledge Transfer, we aim to leverage one dataset for an improved performance on the other dataset.
-We propose two KT experiments, namely: (i) appending datapoints from the other dataset and, (ii) appending sincerity/deception predictions from the other model as features.
+\subsection{Transfer Learning (TL)}
+Using TL, we aim to leverage one dataset for an improved performance on the other dataset.
+We propose two TL experiments, namely: (i) appending datapoints from the other dataset and, (ii) appending sincerity/deception predictions from the other model as features.
 In the first approach, We expect that adding datapoints from the other dataset with synthetically created lables provides a lower generalization error (as has been discussed in \cite{}). 
 The second approach aims to exploit the hypotheses that there exists a relation between the sincerity and deception lables, therefore one can be used a predictor for the other.
 We describe these experiments in detail below. 
@@ -217,7 +227,7 @@ We vary the proportion of SSC data added at each iteration from farthest 5\% to 
 \noindent\underline{\it Sincerity prediction}: 
 The details of sincerity prediction are similar to deception prediction, except for the fact that the model we train is an SVR.
 We implement the regression version of RANSAC algorithm as proposed in \cite{} and the train, test and development set partitions are kept same as the baseline experiments.
-Table~\ref{} shows the results for the RANSAC algorithm implementation.
+Table~\ref{tab:results} shows the results for the RANSAC algorithm implementation.
 \\
 
 \noindent{\bf (b) Label transformation}:
@@ -241,7 +251,7 @@ Obtaining sincerity labels on the deception dataset involves transforming binary
 For our experiments, we approximate all deceptive utterances to carry a fixed sincerity rating. 
 Similarly, all non-decptive utterances are labeled with a different constant sincerity ratings.
 These ratings for the deceptive and non-deceptive utterances are again tuned as a pair for maximal performance on the development partition of the SSC dataset.
-The results for the label transformation are also listed in Table~\ref{}.
+The results for the label transformation are also listed in Table~\ref{tab:results}.
 
 \subsubsection{KT: using sincerity/deception predictions as features}
 In this section, we propose using sincerity prediction as features during deception prediction and vice versa.
@@ -281,7 +291,7 @@ SVR$_\text{S2}$ is trained on the development set to prevent overfitting to the 
 In the next section, we combined the appending datapoints and appending sincerity/deception outcomes as features. 
 
 \subsubsection{KT: appending datapoints + using sincerity/deception predictions as features}
-As the next step, we combine the previous two KT approaches of appending datapoints and sincerity/deception predictions as features.
+As the next step, we combine the previous two TL approaches of appending datapoints and sincerity/deception predictions as features.
 We describe the approaches for deception and sincerity prediction below.
 \\
 
@@ -300,7 +310,7 @@ In the second stage of stacked generalization, SVR$_\text{S2}$ is then trained o
 We again use distances from SVM$_\text{D-GFK}$ as features as soft estimates of deception lables. 
 SVR$_\text{S2}$ provides the final decisions on the SSC testing set.
 
-In the next section, we present our results for the baseline and various KT models and present discussion.
+In the next section, we present our results for the baseline and various TL models and present discussion.
 
 %\subsubsection{Proposed method}
 %The proposed method also exploited both data information and label information. However, unlike the aforementioned two methods, it implemented fusion of labels instead of combining the two datasets, and utilized a kernel-based domain adaptation method to reduce influence of differences in the recording conditions. In general, each data point was assigned 2 labels, one predicted by a D classifier and the other by a S regressor. The two labels were then combined to give a final decision.\par
@@ -315,8 +325,8 @@ In the next section, we present our results for the baseline and various KT mode
 
 \section{Results}
 Table~\ref{tab:results} show the results for the various deception and sincerity prediction results. 
-For the last KT experiment involving both appending of datapoints and using sincerity/deception predictions as features, we perform an additional experiment where the method for training SVM$_\text{D1}$ and SVR$_\text{S1}$ (RANSAC/ Label transformation/ not appending other dataset) for each cross-validation fold is chosen based on their performances on the development set. 
-We perform this experiment to get a fair assessment of the KT on the test set, instead of advocating for a KT approach solely based on the results observed on the test set (a scenario not possible in the real world).
+For the last TL experiment involving both appending of datapoints and using sincerity/deception predictions as features, we perform an additional experiment where the method for training SVM$_\text{D1}$ and SVR$_\text{S1}$ (RANSAC/ Label transformation/ not appending other dataset) for each cross-validation fold is chosen based on their performances on the development set. 
+We perform this experiment to get a fair assessment of the TL on the test set, instead of advocating for a TL approach solely based on the results observed on the test set (a scenario not possible in the real world).
 
 \subsection{Discussion}
 From the results in Table~\ref{tab:results}, we observe that adding datapoints from other dataset has mixed results with only RANSAC shows improvements in case of deception prediction.
