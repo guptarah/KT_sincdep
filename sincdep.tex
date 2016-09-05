@@ -25,7 +25,7 @@
 
 % Title.
 % ------
-\title{Transfer of knowledge between concepts: An application to sincerity and deception prediction}
+\title{Transfer learning between concepts: An application to sincerity and deception prediction}
 %
 % Single address.
 % ---------------
@@ -38,20 +38,36 @@ $^o$Signal Analysis and Interpretation Lab, University of Southern California,  
 \maketitle
 %
 \begin{abstract}
-   Put abstract here
+Transfer learning (TL) involves leveraging information from an external source for enhancing model performances for a problem at hand. 
+Popular TL methods either directly use the data or adapt the models learnt on out-of-domain resources and incorporate them within in-domain models. 
+TL methods have shown promise in several applications such as text classification and cross-domain language classification.
+In this paper, we extend the TL methods to prediction of deceptive intent and sincerity scores on two separate datasets, leveraging information from each other.
+We investigate several TL methods including appending datapoints from the other dataset as well as appending sincerity/deception predictions as features from models learnt on the other dataset. 
+The latter approach is based on the hypotheses that sincerity perception and deceptive intent labels carry certain correlation between them and one could be leveraged during model training for the other. 
+We compare our methods against baseline models trained only on in-domain data and our best models achieve an Unweighted Average Recall (UAR) of 72.02\% in classifying deceptive intent (baseline: 69.64\%) and achieve Spearman's/Pearson's correlation values of 49.37/48.18\% between true and predicted sincerity scores (baseline: 46.51/41.58\%).
  
 \end{abstract}
 %
 \begin{keywords}
-Pathological speech disorders, machine learning, signal processing 
+Transfer Learning (TL), sincerity prediction, deception prediction 
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
-Put intro here
+Transfer Learning (TL) focuses on learning knowledge from one domain and applying it to other related domain \cite{}. 
+TL has shown promise in several research fields including 
+In particular, domain with limited resources (e.g. absence of a comprehensive datasets) can gain from TL approaches as it is possible to learn models on a related problem and adapt the models to domain of interest. 
+Human behavior modeling \cite{} is one such domain where obtaining reliable annotations on large datasets is both expensive and prohibitive in time.
+In this paper, we approach the problem of modeling deceptive intent (deceptive vs not-deceptive) and rating perceived sincerity and apply TL methods in assisting one problem using resources from the other. 
+We hypothesize that the perception of sincerity and deceptive intent carry certain relation and therefore resources in one domain can enhance performance in the other domain.
+We test multiple TL methods such as using data from the other domain, using model predictions from the other domain as well as the combination of these TL approaches. 
+Our experiments target the overarching goal of enhanced human behavior modeling by sharing resources across various related problems and possibly learning a joint representation for various behavioral attributes. 
 
-\section{Related work}
-Put background here
+Studies have investigated and proposed several TL approaches \cite{pan2010survey} and one of the earliest works in TL was proposed by Pratt \cite{pratt1993discriminability}.
+A few TL algorithms include TL via dimensionality reduction \cite{pan2008transfer}, using deep learning representations \cite{bengio2012deep, mesnil2012unsupervised} and transfer learning in a transductive setting \cite{rohrbach2013transfer}.  
+TL methods have been applied to sentiment classification \cite{blitzer2007biographies}, image classification \cite{wu2004improving} and other natural language understanding problems \cite{arnold2007comparative,blitzer2006domain}. 
+Recently, TL has also been applied to human behavior understanding and examples include 
+
 
 \section{Datasets}
 %Two databases from the INTERSPEECH 2016 Computational Paralinguistics Challenge are employed in the experiments, the Deceptive Speech Database (DSD) and the Sincerity Speech Corpus (SSC). For both databases, samples outside of the test set are accessible, constituting the datasets for our experiments, denoted as the D dataset and the S dataset respectively. For both datasets, the official ComParE Acoustic Feature Set was used, containing 6373 static features computed over low-level descriptor contours. For more information about the Challenge, please refer to [x].\par
@@ -124,7 +140,7 @@ In the baseline systems, we only use the datapoints corresponding to each indivi
 We describe the choice of baseline modeling schemes for the deception and sincerity prediction below.
 \\
 
-\noindent{\it Deception prediction}  
+\noindent\underline{\it Deception prediction}  
 We train a Support Vector Machine (SVM) classifier on the Compare Acoustic Feature Set \cite{} to predict the binary label of an utterance being deceptive or not.
 Same classifier was also used in the baseline presented in the Interspeech challenge 2016 \cite{}.
 For evaluation purpose, we perform a 10 fold cross-validation, each fold containing an independent set of speakers.  
@@ -135,7 +151,7 @@ The baseline results are listed in Table~\ref{}.
 Note that the results are slightly different than the one presented in the Interspeech 2016 challenge paper \cite{} as their evaluation defined a different partitioning scheme for the development and the testing set.
 \\
 
-\noindent{\it Sincerity predicition}
+\noindent\underline{\it Sincerity predicition}
 Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) with spearman correlation as the evaluation metric. 
 Same regressor and evaluation metric were used during the Interspeech challenge 2016.
 In this case, we perform a leave one out speaker crossvalidation due to smaller number of datasamples.
@@ -160,56 +176,61 @@ First, we generate synthetic labels for the task at hand for each datapoint in t
 These datapoints and synthetic labels are appended with the datapoints and the lables of the original dataset for final model training.
 We test two synthetic label generation algorithms: Rxxx (Ransac) and label transformation.
 We discuss these algorithms in detail below.
+\\
 
-(a){Random Sample Consensus (RANSAC)}
+\noindent{\bf(a) Random Sample Consensus (RANSAC)}:
 %One way to transfer knowledge is to add one dataset as unlabeled data to the other dataset in hope that more data points will generate better results. In light of this, we implemented the RANSAC algorithm.\par
 %RANSAC is an iterative algorithm. Starting from a small set of data points (the initial dataset), it enlarges the dataset by adding consistent data points and renews the model in each iteration. In an extreme case of RANSAC, the unlabeled data can be added into the initial dataset all in one iteration. More information about RANSAC can be found in [x].\par
 %In our experiments, one of the D and S datasets served as the initial dataset, and the other dataset was treated as unlabeled data to be added. Z-scores were taken on both datasets to reconcile possible differences in data characteristics that resulted from recording conditions.\par
 %For classification on the D dataset, the D train set served as the initial dataset, on which the initial classifier was instantiated. The S dataset was the initial unlabeled dataset. In each iteration, the classifier predicted labels for the unlabeled dataset. Data points that were far away from the decision hyperplane were added into the initial dataset and removed from the unlabeled dataset. A renewed classifier was then trained on the enlarged dataset. When adding the data points in each iteration, three different criteria were applied: (a) data points that were the farthest 5 percent away from the decision hyperplane were added; (b) data points that were the farthest 10 percent away from the decision hyperplane were added; (c) all of the unlabeled data points were added. To stop the iteration, either one of the following two conditions were required: (a) the performance on the development set was stable; (b) the unlabeled dataset was empty. To test the results, we selected the classifier from the iteration in which the performance on the development set was the highest.\par
 %For regression on the S dataset, the D dataset was gradually added into the S dataset. An initial regressor was trained on the S train set. In each iteration, the unlabeled D data points were grouped into several clusters using k-means clustering. The number of clusters was determined using the silhouette method. Then one cluster was selected to add into the initial dataset by the following procedure: (a) each cluster was added into the initial dataset respectively, and regressors were trained on the augmented initial datasets. Therefore each cluster resulted in one regressor; (b) The new regressors were used to predict labels for the corresponding initial dataset, and root mean square errors were computed; (c) The cluster with the smallest corresponding root mean square error was selected. The selected cluster was then added into the initial dataset and excluded from the unlabeled dataset. The stopping criteria were the same as for the classification on the D dataset: (a) the performance on the development set was stable, or (b) the unlabeled dataset was empty. We also tried the extreme case of RANSAC, where the D dataset was added into the S train set all in one iteration. Judging from the performance on the development set, the best regressor among all iterations was used to obtain results on the test set.
-
 During the RANSAC \cite{} implementation, an initial model is trained on the available dataset with lables.
 Then, the algorithm performs prediction on the datapoints without labels.
 A fraction of these datapoints in then added to the existing dataset with labels and an updated model is trained with the additional labelled data.
-Researchers have proposed several criterion for selecting the fraction of data (e.g. adding the datapoints farthest away from class boundaries). 
+Researchers have proposed several criterion for selecting the fraction of data (e.g. adding the datapoints farthest away from class boundaries).
+Studies have investigated the use of RANSAC in ... 
 The procedure is repeated iteratively till a certain criterion is met (in our experiments, we perform the iterations till the performance on the held out development set is maximized).
 Since the task objective is different for the DSD and the SSC corpus, we describe them seprately below. 
+\\
 
-\noindent{\it Deception prediction:}  
+\noindent\underline{\it Deception prediction}:  
 For the purpose of deception prediction, synthetic labels are obtained on the entire SSC dataset.
 We use the same train, test and development set split as in the baseline experiments.
 Initially, an SVM model is obtained using the train partition of the DSD dataset and datapoints are added from the SSC dataset till the performance on the development partition of the DSD dataset is maximized.
 In each iteration, datapoints farthest away from the class boundary are added (more details on this criterion is available in \cite{}).
 We vary the proportion of SSC data added at each iteration from farthest 5\% to all of the data.
+\\
 
-\noindent{\bf Sincerity prediction}  
+\noindent\underline{\it Sincerity prediction}: 
 The details of sincerity prediction are similar to deception prediction, except for the fact that the model we train is an SVR.
 We implement the regression version of RANSAC algorithm as proposed in \cite{} and the train, test and development set partitions are kept same as the baseline experiments.
 Table~\ref{} shows the results for the RANSAC algorithm implementation.
+\\
 
-\subsubsection{Label transformation}
+\noindent{\bf (b) Label transformation}:
 %In an attempt to incorporate label information when appending one dataset to the other, we transformed the labels to achieve compatibility between binary and continuous labels. Z-scores were taken on both datasets to reconcile possible differences in data characteristics that resulted from recording conditions.\par
 %For classification on the D dataset, the continuous S labels were binarized, and the S dataset was appended to the D train set along with the new labels. Binarization was achieved by comparing sincerity ratings to a threshold $V_{th}$, i.e. samples whose sincerity ratings were lower than $V_{th}$ were labeled as Deceptive while others were labeled non-deceptive. A classifier was trained on the enlarged train set, and the threshold was tuned on the development set. Using the optimal threshold and the optimal box constraint, we obtained the test set performance using a classifier trained on the concatenated train and development sets, which included the original train and development sets as well as the S dataset.\par
 %For regression on the S dataset, we assigned different values to D and ND labels, i.e. all deceptive samples were given a sincerity rating $v_{1}$ while the non-deceptive samples were graded $v_{2}$. We enlarged the S train set by adding the D dataset, and tuned $v_{1}$ and $v_{2}$ on the development set. Results on the test set were tested using a regressor trained on the concatenated train and development sets.
-
 Previously, we hypothesized that there exists a relation between the sincerity and the deception labels.
 The RANSAC algorithm does not make of sincerity labels during training decption models (and vice versa). 
 Alternatively during the label transformation, we transform the continous sincerity labels into binary deception labels and vice versa for deception and sincerity prediction, respectively.
 We describe the label transformation for deception and sincerity prediction below.
+\\
 
-\noindent{\it Deception prediction}  
+\noindent\underline{\it Deception prediction}: 
 In this experiment, we append a part of the sincerity dataset to the DSD dataset durint model training.
 The portion of the sincerity dataset with percieved sincerity below (/above) a certain threshold are marked as deceptive (/non-deceptive). 
 These two threshold are tuned as a pair for maximal performance on the development partition of the DSD dataset. 
+\\
 
-\noindent{\it Sincerity prediction}
+\noindent\underline{\it Sincerity prediction}
 Obtaining sincerity labels on the deception dataset involves transforming binary labels into a continous sincerity scale.
 For our experiments, we approximate all deceptive utterances to carry a fixed sincerity rating. 
 Similarly, all non-decptive utterances are labeled with a different constant sincerity ratings.
 These ratings for the deceptive and non-deceptive utterances are again tuned as a pair for maximal performance on the development partition of the SSC dataset.
 The results for the label transformation are also listed in Table~\ref{}.
 
-\subsection{Knowledge transfer: using sincerity/deception predictions as features}
+\subsubsection{KT: using sincerity/deception predictions as features}
 In this section, we propose using sincerity prediction as features during deception prediction and vice versa.
 This approach is motivated from our previous hypothesis that a relationship exists between deception and sincerity perception, therefore obtaining a sincerity score would be useful for deception prediction and vice versa.
 %We adopt two different approaches to this effect.
@@ -217,47 +238,53 @@ In the experiment, we predict the sincerity scores (/deception prediction) on th
 These sincerity (/deception) scores are obtained from a model trained on an adapted version of the SSC (/DSD) dataset.
 As there exists a mismatch between the SSC and DSD datasets, we perform a domain adaptation to reduce the differences in the distribution of SSC and DSD datasets.
 We provide the experimental details for the experiments below.
-
+\\
 %\subsubsection{Sincerity/deception prediction features obtained from original models}
 %In this experiment, during deception (/sincerity) prediction we make use of sincerity (/deception) predictions obtained from models trained on the SSC (/DSD) dataset. We breifly explain the experiments for the deception and sincerity prediction below. 
 
-\noindent{\it Deception prediction} 
+\noindent\underline{\it Deception prediction} 
 We use the train, test and development set partitions for the DSD dataset as described before.
-The sincerity scores for the DSD dataset are obtained from a model trained on a domain adapted version of the SSC dataset.
+In order to obtain the sincerity scores on the DSD dataset, we train a model on an adapted version of the SSC dataset.
 We use the Geodesic Kernel Flow (GFK) adaptation \cite{} to this effect.
-{\bf Check} We treat the SSC dataset as the source dataset and adapt it to have a similar distibution like the DSD dataset. 
-We then train a model on the adapted SSC dataset and make predictions on the DSD dataset.
-The sincerity scores are used in conjunction with the original acoustic features (in section~\ref{sec:}) to predict deception in a stacked generalized framework \cite{}.
-In the stacked generalized framework a deception prediction SVM model is first trained from the original acoustic features on the training set (this model is same as baseline deception predictio model).
-Then, applytig this model on the development set, we obtain the distances from SVM decision hyperplanes as soft deception scores. 
-We then train a final SVM model that combines these soft deception scores and the sincerity scores obtained on the development partition of the DSD dataset to provide the final label. 
+The GFK transformation treats the SSC dataset as the source dataset and adapt it to have a similar distibution like the DSD dataset in a shared subspace (which may be different from the original subspace). 
+We then train an SVR model, SVR$_{S-GFK}$ on the SSC dataset and make predictions on the DSD dataset, in the subspace learnt by GFK transformation.
+For final deception prediction, the sincerity scores obtained from SVR$_{S-GFK}$ are used in conjunction with the original acoustic features (in section~\ref{sec:}) in a stacked generalized framework \cite{}.
+In the stacked generalized framework an SVM model, SVM$_\text{D1}$ is first trained using the original acoustic features from the DSD training set (this model is same as baseline deception predictio model).
+Then, applyig SVM$_\text{D1}$, we obtain the distances from SVM decision hyperplanes as soft estimate of the deception scores. 
+We then train a final SVM model, SVM$_text{D2}$, that combines these soft deception scores from SVM$_\text{D1}$ and the sincerity scores from SVR$_\text{S-GFK}$.
 %These predictions are then combined with the predicted sincerity scores on the DSD dataset by another SVM model to provide the final decision.
-The second layer SVM model is trained on the development partition of DSD dataset to prevent overfitting to the training set. 
+SVM$_\text{D2}$ model is trained on the development partition of DSD dataset to prevent overfitting to the training set. 
+\\
 
-\noindent{\it Sincerity prediction}
+\noindent\underline{\it Sincerity prediction}
 Akin to the deception prediction experiments, we use the predefined train, test and development set partitions for the SSC dataset.
-We predict the deception outcomes for the SSC dataset using a model trained on an adapted version of the DSD dataset.
+In order to obtain deception predictions on the SSC dataset, we train an SVM model, SVM$_\text{D-GFK}$, on an adapted version of the DSD dataset.
 The adaptation is again performed using the GFK transformation, with DSD dataset modified as source dataset to resemble SSC dataset as the target dataset.
-An SVM classifier trained on the adapted version of the DSD dataset predicts deception outcomes on the SSC dataset. 
-However, instead of using the binary deception lables, we use distance of datapoints from SVM decision hyperplanes as a soft deception score. 
+Instead of using the binary deception lables from SVM$_\text{D-GFK}$ on SSC dataset, we again use distance of datapoints from SVM decision hyperplanes as a soft deception score. 
 We combine these deception scores with the original acoustic features again using a stacked generalization framework. 
-An first layer SVR model predicts the sincerity scores based on the original features and is trained on the training partition of the SSC dataset (this model is same as the baseline sincerity prediction model). 
-A second layer SVR model then combines the first layer predictions with the deception scores (distance from SVM hyperplanes) to provide the final sincerity scores.  
-The second layer SVR model is trained on the development set to prevent overfitting to the training set. 
+A first layer SVR model (SVR$_\text{S1}$), trained on the SSC training partition, predicts the sincerity scores based on the original features (this model is same as the baseline sincerity prediction model). 
+A second layer SVR model (SVR$_\text{S2}$) then combines the predictions from SVR$_\text{S1}$ with the deception scores from SVM$_\text{D-GFK}$ to provide the final sincerity scores.  
+SVR$_\text{S2}$ is trained on the development set to prevent overfitting to the training set. 
 In the next section, we combined the appending datapoints and appending sincerity/deception outcomes as features. 
 
-\subsection{KT: appending datapoints + using sincerity/deception predictions as features}
-In this section, we combine the previous two KT approaches of appending datapoints and sincerity/deception predictions as features.
+\subsubsection{KT: appending datapoints + using sincerity/deception predictions as features}
+As the next step, we combine the previous two KT approaches of appending datapoints and sincerity/deception predictions as features.
 We describe the approaches for deception and sincerity prediction below.
 \\
 
-\noindent{\it Deception prediction} This experiment is similar to the deception prediction in the last section involving the incorporation of sincerity/deception scores as features during prediction.
-The only difference is in the first stage of stacked generalization where we append the sincerity dataset instead to the training partition of the DSD dataset to train a deception prediction SVM model, SVM$_\text{D1}$. 
-SVM could then be trained using either RANSAC or label transformation.
-The second stage SVM is then trained using the hyperplane distances from the first  
+\noindent\underline{\it Deception prediction} This experiment is similar to the deception prediction in the last section involving the incorporation of sincerity/deception scores as features during prediction.
+The only difference is in the first stage of stacked generalization where we also append the SSC dataset to the DSD training partition to learn SVM$_\text{D1}$. 
+SVM$_\text{D1}$ could be trained using either RANSAC or label transformation.
+The second stage SVM, SVM$_\text{D2}$ is then trained on the DSD development partition using the hyperplane distances predicted from SVM$_\text{D1}$ and the sincerity scores predicted by SVR$_{S-GFK}$. 
+The final predictions on the DSD testing set are made by SVM$_\text{D2}$.
+\\
 
-\noindent{\it Sincerity prediction}
-
+\noindent\underline{\it Sincerity prediction}
+We modify the first stage of stacked generalization as presented for sincerity prediction in section~\ref{} by appending the DSD dataset to the SSC training partition in learning SVR$_\text{S1}$.
+SVR$_\text{S1}$ is trained either using RANSAC or label transformation. 
+In the second stage of stacked generalization, SVR$_\text{S2}$ is then trained on the development set with outcomes from SVR$_\text{S1}$ and SVM$_\text{D-GFK}$ as features.
+We again use distances from SVM$_\text{D-GFK}$ as features as soft estimates of deception lables. 
+SVR$_\text{S2}$ provides the final decisions on the SSC testing set.
 
 In the next section, we present our results for the baseline and various KT models and present discussion.
 
@@ -273,27 +300,47 @@ In the next section, we present our results for the baseline and various KT mode
 
 
 \section{Results}
-Table~\ref{} and ~\ref{} show the UARs for the various deception and sincerity prediction results. 
-Apart from presenting the result for each approach (baseline, RANSAC, label transformation and appending sincerity/deception scores as features), we also perform an experiment where the training approach is selected based on the perf  
+Table~\ref{tab:results} show the results for the various deception and sincerity prediction results. 
+For the last KT experiment involving both appending of datapoints and using sincerity/deception predictions as features, we perform an additional experiment where the method for training SVM$_\text{D1}$ and SVR$_\text{S1}$ (RANSAC/ Label transformation/ not appending other dataset) for each cross-validation fold is chosen based on their performances on the development set. 
+We perform this experiment to get a fair assessment of the KT on the test set, instead of advocating for a KT approach solely based on the results observed on the test set (a scenario not possible in the real world).
 
+\subsection{Discussion}
+From the results in Table~\ref{tab:results}, we observe that adding datapoints from other dataset has mixed results with only RANSAC shows improvements in case of deception prediction.
+This may stem for the fact that the labels are synthetically generated as well as the distribution of the datasamples in DSD and SSC datasets are not similar due to difference in recording conditions and data collection protocols. 
+Therefore, adding the other dataset with synthetic lables only serves as a source on noise.
+On the other hand, adding sincerity/deception scores after domain adaptation improves over the baseline. 
+The UAR improvement is significant in case of deception prediction using McNemar test (p-value $<$ 5\%) modified for UAR, accounting for data imbalance \cite{}.
+The improvement in spearman correlation for SSC dataset is not significant at 5\% using Fisher r-to-z transformation, althogh the pearson correlation does show a marginally significant improvement (Fisher r-to-z transformation, p-value $<$ 10\%). 
+Finally, adding datapoints from other dataset along with using sincerity/deception scores as features again gives mixed results with improvements only for label transformation. 
+
+We observe that using sincerity/deception scores as features during prediction delivers promising results.
+On computing the absolute spearman correlation coefficients between the predictions from SVR$_\text{S-GFK}$ and the true deception lables, we obtain a value of 0.2.
+Similarly the absolute correlation coefficient between the deception scores obtained from SVM$_\text{D-GFK}$ and the true sincerity scores is 0.2.
+Although these correlation coefficients are moderate, they correlation trend is also expected with deceptive lables having a low sincerity score and vice versa (in both the transformation experiments).  
+Adding datapoints from the other dataset does not always improve the performance, therefore indicating that the synthetic label generation needs alteration. 
+One future work in this regard is addressing the difference between the datasets while generating synthetic lables. 
+ 
 %%Generally speaking, the performance improved after the fusion of labels, no matter which classifier/regressor was used to derive $Lbl_{orig}$. It did matter, however, whether the GFK domain adaptation was used to obtain $Lbl_{other}$, as shown in the table that without the domain adaptation, $Lbl_{other}$ would very much resemble random guessing. When using $Lbl_{orig}$ only, i.e. using the methods in 4.2.1 and 4.2.2 and their combination with the baseline method, the performance didn't show improvement in most cases as compared to the baselines.\par
 %%In deception recognition, \par
 
-
+\begin{table}
 \begin{tabular}{l|l|l}
-            & Deception (UAR) & Sincerity ($\rho$) \\ \hline
-Baseline & 69.64 & 46.51 \\ \hline
+            & Deception  & Sincerity  \\ 
+            & (UAR in \%) & ($\rho_s, \rho_p$ in \%) \\ \hline
+Baseline & 69.64 & 46.51, 41.58 \\ \hline
 \multicolumn{3}{c} {KT: adding datapoints from other dataset} \\ \hline 
-RANSAC & 70.26 & 46.45 \\
-Label Transformation & 67.17 & 43.44 \\ \hline
+RANSAC & 70.26 & 46.45, 33.66 \\
+Label Transformation & 67.17 & 43.44, 29.36 \\ \hline
 \multicolumn{3}{c} {KT: Sinc./Dep. scores as features} \\ \hline 
- & 72.02 & 48.53 \\ \hline 
+ & 72.02 & 48.53, 47.84 \\ \hline 
 \multicolumn{3}{c} {KT: adding datapoints + Sinc./Dep. scores as features} \\ \hline 
-+ RANSAC & 72.02 & 48.53 \\ 
-+ Label transformation & 69.90 & 49.37 \\
-+ Tuned & 70.59 & 48.96 \\ 
++ RANSAC & 72.02 & 48.50, 48.04 \\ 
++ Label transformation & 69.90 & 49.37, 48.18\\
++ Tuned & 70.59 & 48.96, 47.38 \\ 
 \end{tabular}
-
+\caption{Results for predicting binary deception lables and sincerity scores on the DSD and SSC datasets, respectively. Metrics for DSD and SSC datasets is Unweighted Average Recall (UAR) and Spearman's correlation ($\rho$). }
+\label{tab:results}
+\end{table}
 
 %\centerline{Table1. UAR in deception recognition}
 %\begin{threeparttable}
@@ -353,8 +400,7 @@ Label Transformation & 67.17 & 43.44 \\ \hline
 %\item[3] In the combined method, as stated in 4.2.3, the three methods above were integrated by selecting the regressor that performed the best on the development set in each fold. The said regressor was then used in the fusion.
 %\end{tablenotes}
 %\end{threeparttable}
-
-\section{Discussion}
+%
 
 \section{Conclusion}
 \cite{grosz2015assessing}
