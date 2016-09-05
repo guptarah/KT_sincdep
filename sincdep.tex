@@ -66,8 +66,19 @@ Our experiments target the overarching goal of enhanced human behavior modeling 
 Studies have investigated and proposed several TL approaches \cite{pan2010survey} and one of the earliest works in TL was proposed by Pratt \cite{pratt1993discriminability}.
 A few TL algorithms include TL via dimensionality reduction \cite{pan2008transfer}, using deep learning representations \cite{bengio2012deep, mesnil2012unsupervised} and transfer learning in a transductive setting \cite{rohrbach2013transfer}.  
 TL methods have been applied to sentiment classification \cite{blitzer2007biographies}, image classification \cite{wu2004improving} and other natural language understanding problems \cite{arnold2007comparative,blitzer2006domain}. 
-Recently, TL has also been applied to human behavior understanding and examples include 
+Recently, TL methods have been applied to modeling human behavior such as emotion recognition \cite{zhang2016enhanced}, facial expression recognition \cite{chen2013learning} as well as analysis \cite{sangineto2014we}. 
+Within the prediction of sincerity and deception, Zhang et al. \cite{zhang2016sinc} recently proposed a transfer learning approach with multi-task learning perspective.
+{\bf Add a sentence abouth zhang et al. and say how our algo is different after seeing that paper at IS.} 
 
+
+We perform decection and deception modeling on the Deceptive Speech Database and Sincerity Speech Corpus made availalble during the Interspeech challenge 2016 \cite{schuller2016interspeech}.
+Initially, we train baseline models from in-domain resources without using any TL from the other dataset. 
+This is followed by testing various settings of TL categorized as: (i) using datapoints from the other dataset and, (ii) using sincerity/deception predictions from the other model as features.
+Using sincerity (/deception) scores during deception (/sincerity) prediction is based on the hypotheses that the two concepts are related, with deceptive sentences being more likely to being perceived as unsincere and vice versa. 
+Research in psychology has investigated the concepts of sincerity and deception and  
+We then finally combine the two approaches and test using datapoints from the other dataset as well as sincerity/deception predictions from other model as features.
+The best models achieve an Unweighted Average Recall (UAR) of 72.02\% (baseline: 69.64) on classifying deceptive vs non-deceptive intent and Spearman's/Pearson's corelation coefficients of 49.37/48.18 (baseline: 46.51/41.58) between true and predicted sincerity scores.
+We finally analyze the results and present our conclusions. 
 
 \section{Datasets}
 %Two databases from the INTERSPEECH 2016 Computational Paralinguistics Challenge are employed in the experiments, the Deceptive Speech Database (DSD) and the Sincerity Speech Corpus (SSC). For both databases, samples outside of the test set are accessible, constituting the datasets for our experiments, denoted as the D dataset and the S dataset respectively. For both datasets, the official ComParE Acoustic Feature Set was used, containing 6373 static features computed over low-level descriptor contours. For more information about the Challenge, please refer to [x].\par
@@ -82,7 +93,7 @@ Recently, TL has also been applied to human behavior understanding and examples 
 %\subsection{Comparisons between datasets D and S}
 %The D dataset and the S dataset are linked together by the complementary relationship between deception and sincerity. Certain similarities are expected to exist between Deceptive samples and instances in the S dataset with low sincerity scores, and also between Non-deceptive samples and highly sincere instances.\par
 %Nevertheless, in terms of recording conditions, the two datasets are hardly alike. 
-Speech samples in the D dataset are more similar to natural speech, as the subjects were allowed to arrange speech and show emotions freely. On the contrary, participants for the S dataset were subjected to more restrictions, resulting in more acting. Moreover, labels for the D dataset are objective and binary, while sincerity ratings are subjective and continuous.\par
+%Speech samples in the D dataset are more similar to natural speech, as the subjects were allowed to arrange speech and show emotions freely. On the contrary, participants for the S dataset were subjected to more restrictions, resulting in more acting. Moreover, labels for the D dataset are objective and binary, while sincerity ratings are subjective and continuous.\par
 %The aforementioned differences pose challenge to transferring knowledge from one dataset to the other. On the other hand, they help simulate a real-world inter-concept knowledge transfer situation, where little consistency is guaranteed between corpora.
 
 We use two datasets for the purpose of our experiments: (i) deception dataset and, (ii) sincerity dataset.
@@ -92,7 +103,8 @@ We breifly describe these two datasets below.\\
 \noindent{\bf Deceptive Speech Dataset (DSD)}:
 The DSD dataset is available from the University of Arizona and we use a set of 1059 speech samples obtained from x participants.
 In each of these samples, the participant either lies about his identity and behavior or tells the truth. 
-Therefore, each of these samples is associated with a binary label of the speech being deceptive or not.`
+Therefore, each of these samples is associated with a binary label of the speech being deceptive or not.
+x utterances (out of 1059) are marked as deceptive in the dataset.
 We refer the reader to \cite{} for further details on this dataset.\\ 
 
 \noindent{\bf Sincerity Speech Corpus (SSC)}:
@@ -140,25 +152,26 @@ In the baseline systems, we only use the datapoints corresponding to each indivi
 We describe the choice of baseline modeling schemes for the deception and sincerity prediction below.
 \\
 
-\noindent\underline{\it Deception prediction}  
+\noindent\underline{\it Deception prediction}: 
 We train a Support Vector Machine (SVM) classifier on the Compare Acoustic Feature Set \cite{} to predict the binary label of an utterance being deceptive or not.
 Same classifier was also used in the baseline presented in the Interspeech challenge 2016 \cite{}.
 For evaluation purpose, we perform a 10 fold cross-validation, each fold containing an independent set of speakers.  
 8 partitions are used as training set, 1 as development set and 1 as testing set.
 SVM parameters such as kernel and box-constraint are tuned on the development set.
-We use Unweighted Average Recall (UAR) as the evaluation metric on the DSD dataset, as was also the case during the Interspeech challenge 2016 \cite{}. 
+We use Unweighted Average Recall (UAR) as the evaluation metric on the DSD dataset, as was also the case during the Interspeech challenge 2016 \cite{}.
+UAR assigns equal weight to each class during recall computation, a case helpful when the class distibution is biased. 
 The baseline results are listed in Table~\ref{}.
 Note that the results are slightly different than the one presented in the Interspeech 2016 challenge paper \cite{} as their evaluation defined a different partitioning scheme for the development and the testing set.
 \\
 
-\noindent\underline{\it Sincerity predicition}
-Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) with spearman correlation as the evaluation metric. 
-Same regressor and evaluation metric were used during the Interspeech challenge 2016.
-In this case, we perform a leave one out speaker crossvalidation due to smaller number of datasamples.
+\noindent\underline{\it Sincerity predicition}:
+Since the sincerity predicition involves continuous lables, we train a Support Vector Regressor (SVR) as the predictor (same regressor model was used during the Interspeech challenge 2016 \cite{}).
+We use evaluation metrics as both Spearman's and Pearsons's correlation to obtain a sense of relative ordering as well as linear correspondance between predicted and true labels. 
+In the baseline experiment, we perform a finer leave one out speaker crossvalidation due to a small number of datasamples.
 Apart from the speaker in the testing set, other speakers are roughly equally divided between the training and the development set.
-The parameters for the SVR (kerner and box-constraint) are tuned on a development set. 
+The parameters for the SVR (kerner and box-constraint) are tuned on the development set. 
 Table~\ref{} presents the baseline results.
-The results are slightly different from the ones presented in the Interspeech 2016 challenge paper \cite{} due to difference in partition and the fact that during the challenge, the box-constraint parameter was tuned globally for each fold.
+The results are slightly different from the ones presented in the Interspeech 2016 challenge paper \cite{} due to difference in partition and the fact that in the Interspeech challenge, the box-constraint parameter was tuned globally for each fold.
 We, on the other hand, find the best parameters for each for indipendently based on the development set. 
 
 \subsection{Knowledge Transfer (KT)}
@@ -223,7 +236,7 @@ The portion of the sincerity dataset with percieved sincerity below (/above) a c
 These two threshold are tuned as a pair for maximal performance on the development partition of the DSD dataset. 
 \\
 
-\noindent\underline{\it Sincerity prediction}
+\noindent\underline{\it Sincerity prediction}:
 Obtaining sincerity labels on the deception dataset involves transforming binary labels into a continous sincerity scale.
 For our experiments, we approximate all deceptive utterances to carry a fixed sincerity rating. 
 Similarly, all non-decptive utterances are labeled with a different constant sincerity ratings.
@@ -242,7 +255,7 @@ We provide the experimental details for the experiments below.
 %\subsubsection{Sincerity/deception prediction features obtained from original models}
 %In this experiment, during deception (/sincerity) prediction we make use of sincerity (/deception) predictions obtained from models trained on the SSC (/DSD) dataset. We breifly explain the experiments for the deception and sincerity prediction below. 
 
-\noindent\underline{\it Deception prediction} 
+\noindent\underline{\it Deception prediction}: 
 We use the train, test and development set partitions for the DSD dataset as described before.
 In order to obtain the sincerity scores on the DSD dataset, we train a model on an adapted version of the SSC dataset.
 We use the Geodesic Kernel Flow (GFK) adaptation \cite{} to this effect.
@@ -256,7 +269,7 @@ We then train a final SVM model, SVM$_text{D2}$, that combines these soft decept
 SVM$_\text{D2}$ model is trained on the development partition of DSD dataset to prevent overfitting to the training set. 
 \\
 
-\noindent\underline{\it Sincerity prediction}
+\noindent\underline{\it Sincerity prediction}:
 Akin to the deception prediction experiments, we use the predefined train, test and development set partitions for the SSC dataset.
 In order to obtain deception predictions on the SSC dataset, we train an SVM model, SVM$_\text{D-GFK}$, on an adapted version of the DSD dataset.
 The adaptation is again performed using the GFK transformation, with DSD dataset modified as source dataset to resemble SSC dataset as the target dataset.
@@ -272,14 +285,15 @@ As the next step, we combine the previous two KT approaches of appending datapoi
 We describe the approaches for deception and sincerity prediction below.
 \\
 
-\noindent\underline{\it Deception prediction} This experiment is similar to the deception prediction in the last section involving the incorporation of sincerity/deception scores as features during prediction.
+\noindent\underline{\it Deception prediction}: 
+This experiment is similar to the deception prediction in the last section involving the incorporation of sincerity/deception scores as features during prediction.
 The only difference is in the first stage of stacked generalization where we also append the SSC dataset to the DSD training partition to learn SVM$_\text{D1}$. 
 SVM$_\text{D1}$ could be trained using either RANSAC or label transformation.
 The second stage SVM, SVM$_\text{D2}$ is then trained on the DSD development partition using the hyperplane distances predicted from SVM$_\text{D1}$ and the sincerity scores predicted by SVR$_{S-GFK}$. 
 The final predictions on the DSD testing set are made by SVM$_\text{D2}$.
 \\
 
-\noindent\underline{\it Sincerity prediction}
+\noindent\underline{\it Sincerity prediction}:
 We modify the first stage of stacked generalization as presented for sincerity prediction in section~\ref{} by appending the DSD dataset to the SSC training partition in learning SVR$_\text{S1}$.
 SVR$_\text{S1}$ is trained either using RANSAC or label transformation. 
 In the second stage of stacked generalization, SVR$_\text{S2}$ is then trained on the development set with outcomes from SVR$_\text{S1}$ and SVM$_\text{D-GFK}$ as features.
